@@ -1,50 +1,51 @@
-import { omit } from "@/lib"
+import OpenAI from "openai";
+
+import { omit } from "@/lib";
 import {
-  FunctionParamsReturnType,
-  JsonModeParamsReturnType,
-  JsonSchemaParamsReturnType,
-  MessageBasedParamsReturnType,
-  ParseParams,
-  ToolFunctionParamsReturnType
-} from "@/types"
-import OpenAI from "openai"
+    FunctionParamsReturnType,
+    JsonModeParamsReturnType,
+    JsonSchemaParamsReturnType,
+    MessageBasedParamsReturnType,
+    ParseParams,
+    ToolFunctionParamsReturnType
+} from "@/types";
 
 export function OAIBuildFunctionParams<T extends OpenAI.ChatCompletionCreateParams>(
   definition: ParseParams,
   params: T
 ): FunctionParamsReturnType<T> {
-  const { name, description, ...definitionParams } = definition
+  const { name, description, ...definitionParams } = definition;
 
   const function_call: OpenAI.ChatCompletionFunctionCallOption = {
-    name
-  }
+    name,
+  };
 
   const functions: OpenAI.FunctionDefinition[] = [
     ...(params?.functions ?? []),
     {
       name: name,
       description: description ?? undefined,
-      parameters: definitionParams
-    }
-  ]
+      parameters: definitionParams,
+    },
+  ];
 
   return {
     ...params,
     function_call,
-    functions
-  }
+    functions,
+  };
 }
 
 export function OAIBuildToolFunctionParams<T extends OpenAI.ChatCompletionCreateParams>(
   definition: ParseParams,
   params: T
 ): ToolFunctionParamsReturnType<T> {
-  const { name, description, ...definitionParams } = definition
+  const { name, description, ...definitionParams } = definition;
 
   const tool_choice: OpenAI.ChatCompletionToolChoiceOption = {
     type: "function",
-    function: { name }
-  }
+    function: { name },
+  };
 
   const tools: OpenAI.ChatCompletionTool[] = [
     {
@@ -52,8 +53,8 @@ export function OAIBuildToolFunctionParams<T extends OpenAI.ChatCompletionCreate
       function: {
         name: name,
         description: description,
-        parameters: definitionParams
-      }
+        parameters: definitionParams,
+      },
     },
     ...(params.tools?.map(
       (tool): OpenAI.ChatCompletionTool => ({
@@ -61,17 +62,17 @@ export function OAIBuildToolFunctionParams<T extends OpenAI.ChatCompletionCreate
         function: {
           name: tool.function.name,
           description: tool.function.description,
-          parameters: tool.function.parameters
-        }
+          parameters: tool.function.parameters,
+        },
       })
-    ) ?? [])
-  ]
+    ) ?? []),
+  ];
 
   return {
     ...params,
     tool_choice,
-    tools
-  }
+    tools,
+  };
 }
 
 export function OAIBuildMessageBasedParams<T extends OpenAI.ChatCompletionCreateParams>(
@@ -90,11 +91,11 @@ export function OAIBuildMessageBasedParams<T extends OpenAI.ChatCompletionCreate
 
           description: ${definition.description}
           json schema: ${JSON.stringify(definition)}
-        `
+        `,
       },
-      ...params.messages
-    ]
-  }
+      ...params.messages,
+    ],
+  };
 }
 
 export function OAIBuildJsonModeParams<T extends OpenAI.ChatCompletionCreateParams>(
@@ -114,11 +115,11 @@ export function OAIBuildJsonModeParams<T extends OpenAI.ChatCompletionCreatePara
 
           description: ${definition.description}
           json schema: ${JSON.stringify(definition)}
-        `
+        `,
       },
-      ...params.messages
-    ]
-  }
+      ...params.messages,
+    ],
+  };
 }
 
 export function OAIBuildJsonSchemaParams<T extends OpenAI.ChatCompletionCreateParams>(
@@ -129,7 +130,7 @@ export function OAIBuildJsonSchemaParams<T extends OpenAI.ChatCompletionCreatePa
     ...params,
     response_format: {
       type: "json_object",
-      schema: omit(["name", "description"], definition)
+      schema: omit(["name", "description"], definition),
     },
     messages: [
       {
@@ -140,9 +141,9 @@ export function OAIBuildJsonSchemaParams<T extends OpenAI.ChatCompletionCreatePa
           and return a valid and fully escaped JSON object that matches the schema and those instructions.
 
           description: ${definition.description}
-        `
+        `,
       },
-      ...params.messages
-    ]
-  }
+      ...params.messages,
+    ],
+  };
 }
