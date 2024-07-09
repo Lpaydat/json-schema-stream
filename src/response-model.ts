@@ -1,6 +1,4 @@
 import OpenAI from "openai";
-import { z } from "zod";
-import zodToJsonSchema from "zod-to-json-schema";
 
 import { MODE } from "@/constants/modes";
 import {
@@ -13,35 +11,21 @@ import {
 
 import { Mode, ModeParamsReturnType, ResponseModel } from "./types";
 
-export function withResponseModel<
-  T extends z.AnyZodObject,
-  M extends Mode,
-  P extends OpenAI.ChatCompletionCreateParams
->({
+export function withResponseModel<M extends Mode, P extends OpenAI.ChatCompletionCreateParams>({
   response_model: { name, schema, description = "" },
   mode,
   params,
 }: {
-  response_model: ResponseModel<T>;
+  response_model: ResponseModel;
   mode: M;
   params: P;
 }): ModeParamsReturnType<P, M> {
   const safeName = name.replace(/[^a-zA-Z0-9]/g, "_").replace(/\s/g, "_");
 
-  const { definitions } = zodToJsonSchema(schema, {
-    name: safeName,
-    errorMessages: true,
-  });
-
-  if (!definitions || !definitions?.[safeName]) {
-    console.warn("Could not extract json schema definitions from your schema", schema);
-    throw new Error("Could not extract json schema definitions from your schema");
-  }
-
   const definition = {
     name: safeName,
     description,
-    ...definitions[safeName],
+    ...schema,
   };
 
   if (mode === MODE.FUNCTIONS) {

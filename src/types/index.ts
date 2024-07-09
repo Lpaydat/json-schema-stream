@@ -26,8 +26,10 @@ export type ParseParams = {
 
 export type Mode = keyof typeof MODE;
 
-export type ResponseModel<T extends z.AnyZodObject> = {
-  schema: T;
+export type JSONSchema = object | JsonSchema7Type;
+
+export type ResponseModel = {
+  schema: JSONSchema;
   name: string;
   description?: string;
 };
