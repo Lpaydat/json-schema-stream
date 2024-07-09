@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import { JsonSchema7Type } from "zod-to-json-schema";
+import zodToJsonSchema, { JsonSchema7Type } from "zod-to-json-schema";
 
 import { MODE } from "@/constants/modes";
 
@@ -28,8 +28,8 @@ export type Mode = keyof typeof MODE;
 
 export type JSONSchema = object | JsonSchema7Type;
 
-export type ResponseModel = {
-  schema: JSONSchema;
+export type ResponseModel<T extends z.AnyZodObject> = {
+  schema: T | JSONSchema;
   name: string;
   description?: string;
 };

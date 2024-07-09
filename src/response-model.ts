@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { z } from "zod";
 
 import { MODE } from "@/constants/modes";
 import {
@@ -10,23 +11,24 @@ import {
 } from "@/oai/params";
 
 import { Mode, ModeParamsReturnType, ResponseModel } from "./types";
+import { getSchemaDefinition } from "./utils/getSchemaDefinition";
 
-export function withResponseModel<M extends Mode, P extends OpenAI.ChatCompletionCreateParams>({
+export function withResponseModel<
+  T extends z.AnyZodObject,
+  M extends Mode,
+  P extends OpenAI.ChatCompletionCreateParams
+>({
   response_model: { name, schema, description = "" },
   mode,
   params,
 }: {
-  response_model: ResponseModel;
+  response_model: ResponseModel<T>;
   mode: M;
   params: P;
 }): ModeParamsReturnType<P, M> {
   const safeName = name.replace(/[^a-zA-Z0-9]/g, "_").replace(/\s/g, "_");
 
-  const definition = {
-    name: safeName,
-    description,
-    ...schema,
-  };
+  const definition = getSchemaDefinition({ name: safeName, schema, description });
 
   if (mode === MODE.FUNCTIONS) {
     return OAIBuildFunctionParams<P>(definition, params) as ModeParamsReturnType<P, M>;
