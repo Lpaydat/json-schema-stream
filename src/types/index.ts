@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { z } from "zod";
-import zodToJsonSchema, { JsonSchema7Type } from "zod-to-json-schema";
+import { JsonSchema7Type } from "zod-to-json-schema";
 
 import { MODE } from "@/constants/modes";
 
